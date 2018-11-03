@@ -169,38 +169,132 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
     
 
 }
-/*
-proxCharRep(ponteiro2, '.');
+int insereLista(const char* local) {
+    FILE* ponteiro;
+    char string[100];
+    int aux;
+   
+    ponteiro = fopen(local, "a");
 
-    proxChar(ponteiro2, '.');
-    fscanf(ponteiro2, "%d", &aux2);
-    proxChar(ponteiro2, '.');
-    fseek(ponteiro1, aux2 + 52, 0);
-    fgets(aux, 3, ponteiro1);
-    
-    if(!(valor = verSeTem(ponteiro3, aux))) {
-        fputs(aux, ponteiro3);
-        fputc('.',ponteiro3);
-        fprintf(ponteiro3, "%d", (aux2/REG_SIZE) * IND_SIZE);
-        for(int i = 0;i < (IND_SIZE - 2 - tamNum(aux2) - 2);++i) {
-            fputc('.',ponteiro3);
-        }
-        fputc('\n', ponteiro3);
-        fprintf(ponteiro2, "%d", -1);
-    } else {
-        valor--;
-        fseek(ponteiro3, valor * IND_SIZE, 0);
-        proxChar(ponteiro3, '.');
-        proxCharRep(ponteiro3, '.');
-        fseek(ponteiro3, -1, 1);
-        fscanf(ponteiro3, "%d", &aux3);
-        fprintf(ponteiro2, "%d", aux3);
-        //fseek(ponteiro3, 1, 1);
-        fseek(ponteiro3, valor * IND_SIZE, 0);
-        proxChar(ponteiro3, '.');
-        proxCharRep(ponteiro3, '.');
-        fseek(ponteiro3, -1, 1);
-        fprintf(ponteiro3, "%d", (aux2/REG_SIZE) * IND_SIZE);
-    
+    printf("Digite a matrícula desejada: ");
+    scanf("%s", string);
+    while(strlen(string) != 6) {
+        printf("Digite a matrícula desejada: ");
+        scanf("%s", string); 
     }
-    */
+    fprintf(ponteiro, "%s ", string);
+
+    setbuf(stdin, NULL);
+
+    printf("Digite o nome desejado: ");
+    scanf("%[^\n]s", string);
+    printf("%ld\n", strlen(string));
+    while(strlen(string) >= 40) {
+        printf("Digite o nome desejado: ");
+        scanf("%[^\n]s", string); 
+    }
+    fprintf(ponteiro, "%s ", string);
+    for(int i = strlen(string); i < 40;++i) {
+        fputc(' ', ponteiro);
+    }
+
+    setbuf(stdin, NULL);
+
+    printf("Digite a OP desejada: ");
+    scanf("%s", string);
+    while(strlen(string) != 2) {
+        printf("Digite a OP desejada: ");
+        scanf("%s", string); 
+    }
+    fprintf(ponteiro, "%s ", string);
+    fputc(' ', ponteiro);
+
+    setbuf(stdin, NULL);
+
+    printf("Digite o curso desejado: ");
+    scanf("%s", string);
+    while(strlen(string) != 2) {
+        printf("Digite o curso desejado: ");
+        scanf("%s", string); 
+    }
+    fprintf(ponteiro, "%s ", string);
+    for(int i = 0;i < 6;++i) {
+        fputc(' ', ponteiro);
+    }
+
+    setbuf(stdin, NULL);
+
+    printf("Digite a turma desejada: ");
+    scanf("%s", string);
+    while(strlen(string) != 1) {
+        printf("Digite a turma desejada: ");
+        scanf("%s", string); 
+    }
+    fprintf(ponteiro, "%s", string);
+
+    setbuf(stdin, NULL);
+
+    fputc(13, ponteiro);
+    fputc('\n', ponteiro);
+
+    fclose(ponteiro);
+    return 1;
+}
+
+void print_arq(char* filename){
+
+    FILE* fp;
+    char c;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL) 
+    { 
+        printf("Arquivo não pôde ser aberto\n"); 
+        return;
+    } 
+  
+    // Read contents from file 
+    c = fgetc(fp);
+    while (c != EOF) 
+    { 
+        printf("%c", c); 
+        c = fgetc(fp); 
+    } 
+  
+    fclose(fp);  
+}
+
+
+int arquSort(const char* nome, int tam) {
+    FILE* ponteiro;
+    lista* list;
+    data aux;
+    int size;
+
+    list = createList();
+
+
+    ponteiro = fopen(nome, "r+");
+
+
+    while(!feof(ponteiro)) {
+        for(int i = 0;i < 30;++i) {
+            aux.string[i] = fgetc(ponteiro);
+        }
+        aux.string[30] = 0;
+        if(feof(ponteiro))
+                break;
+        push(list, aux);
+    }
+    listSort(list, tam);
+    fseek(ponteiro, 0, 0);
+
+    size = list->size;
+    for(int i = 0;i < size;++i) {
+        aux = pop(list);
+        fputs(aux.string, ponteiro);
+    }
+    fclose(ponteiro);
+
+    return 1;
+}

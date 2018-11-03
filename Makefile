@@ -7,10 +7,10 @@ LDIR =.
 
 LIBS=-lm
 
-_DEPS = head.h func.h
+_DEPS = head.h func.h lista.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = func.o main.o 
+_OBJ = func.o main.o lista.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
