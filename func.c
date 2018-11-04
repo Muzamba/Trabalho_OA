@@ -59,16 +59,33 @@ int makeInd1(const char* arquivo, const char* nome) {
             fclose(ponteiro2);
             return 1;
         }
-        if(aux == ' ') {
-            flag++;
-        } else if(flag <= 1){
+        if(aux == '*') {
+            proxChar(ponteiro1, '\n');
+            cont2++;
+
+        }else if(aux == ' ') {
+            aux = fgetc(ponteiro1);
+            if((aux == ' ')||(cont1 > 30)) {
+                flag = 1;    
+            }
+            fseek(ponteiro1, -1, 1);
+            
+        } else if (!(flag || (cont1 >= 30))) {
             fputc(aux, ponteiro2);
             cont1++;
         } else {
-            fputc('.',ponteiro2);
+            for(int i = 0;i < 30 - cont1;++i) {
+                fputc('.', ponteiro2);
+                
+            }
+            fputc('|',ponteiro2);
             fprintf(ponteiro2, "%d", cont2 * REG_SIZE);
-            for(int i = 0;i < (IND_SIZE - cont1 - tamNum(cont2 * REG_SIZE) - 2);++i) {
+            for(int i = 0;i < (5 - tamNum(cont2 * REG_SIZE));++i) {
                 fputc('.',ponteiro2);
+            }
+            fputc('|',ponteiro2);
+            for(int i = 0;i < 5;++i) {
+                fputc('.', ponteiro2);
             }
             fputc('\n', ponteiro2);
             proxChar(ponteiro1, '\n');
@@ -84,13 +101,15 @@ int verSeTem(FILE* ponteiro, const char* string) {
     }
     int cont = 1;
     char aux1;
-    char aux[2];
+    char aux[50];
+    int tam;
+    tam = strlen(string)+1;
     fseek(ponteiro, 0, 0);
     aux1 = fgetc(ponteiro);
     fseek(ponteiro, -1, 1);
     while(aux1 != -1) {
         fseek(ponteiro, -1, 1);
-        fgets(aux, 3, ponteiro);
+        fgets(aux, tam, ponteiro);
         if(!strcmp(string, aux)) {
             return cont;
         }
@@ -109,6 +128,7 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
     char aux[2];
     int aux2, aux3;
     int valor;
+    int cont = 0;
 
     ponteiro1 = fopen(data, "r");
     if(ponteiro1 == NULL) {
@@ -122,43 +142,45 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
 
 
     while(1) {
-        proxChar(ponteiro2, '.');
+        proxChar(ponteiro2, '|');
         if(feof(ponteiro2)){
             break;
         }
         fscanf(ponteiro2, "%d", &aux2);
-        proxChar(ponteiro2, '.');
+        proxChar(ponteiro2, '|');
         fseek(ponteiro1, aux2 + 52, 0);
         fgets(aux, 3, ponteiro1);
     
         if(!(valor = verSeTem(ponteiro3, aux))) {
+            //fseek(ponteiro3, 0, 2);
             fputs(aux, ponteiro3);
-            fputc('.',ponteiro3);
-            fprintf(ponteiro3, "%d", (aux2/REG_SIZE) * IND_SIZE);
-            for(int i = 0;i < (IND_SIZE - 2 - tamNum((aux2/REG_SIZE) * IND_SIZE) - 2);++i) {
-                fputc('.',ponteiro3);
+            fputc('|',ponteiro3);
+            fprintf(ponteiro3, "%d", cont * IND_SIZE);
+            fprintf(ponteiro2, "%d", -1);
+            for(int i = 0;i <  5 - tamNum(cont * IND_SIZE);++i){
+                fputc('.', ponteiro3);
             }
             fputc('\n', ponteiro3);
-            fprintf(ponteiro2, "%d", -1);
         } else {
             valor--;
-            fseek(ponteiro3, valor * IND_SIZE, 0);
-            proxChar(ponteiro3, '.');
-            proxCharRep(ponteiro3, '.');
-            fseek(ponteiro3, -1, 1);
+            fseek(ponteiro3, valor * IND2_SIZE, 0);
+            proxChar(ponteiro3, '|');
+            //fseek(ponteiro3, -1, 1);
             fscanf(ponteiro3, "%d", &aux3);
             fprintf(ponteiro2, "%d", aux3);
         //fseek(ponteiro3, 1, 1);
-            fseek(ponteiro3, valor * IND_SIZE, 0);
-            proxChar(ponteiro3, '.');
-            proxCharRep(ponteiro3, '.');
-            fseek(ponteiro3, -1, 1);
-            fprintf(ponteiro3, "%d", (aux2/REG_SIZE) * IND_SIZE);
+            fseek(ponteiro3, valor * IND2_SIZE, 0);
+            proxChar(ponteiro3, '|');
+            //fseek(ponteiro3, -1, 1);
+            fprintf(ponteiro3, "%d", cont * IND_SIZE);
+            for(int i = 0;i < 5 - tamNum(cont * IND_SIZE);++i){
+                fputc('.', ponteiro3);
+            }
     
         }
 
-        proxCharRep(ponteiro2, '.');
-
+        //proxCharRep(ponteiro2, '.');
+        cont++;
     }
 
     fclose(ponteiro1);
@@ -169,13 +191,21 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
     
 
 }
-int insereLista(const char* local) {
+int insereLista(const char* local,lista* list) {
     FILE* ponteiro;
     char string[100];
-    int aux;
+    char aux;
+    data aux2;
    
-    ponteiro = fopen(local, "a");
-
+    ponteiro = fopen(local, "r+");
+    if(list->size == 0){
+        fseek(ponteiro, 0, 2);
+    } else {
+        aux2 = pop(list);
+        printf("%d\n", aux2.end);
+        fseek(ponteiro, aux2.end, 0);
+    }
+    
     printf("Digite a matrícula desejada: ");
     scanf("%s", string);
     while(strlen(string) != 6) {
@@ -183,6 +213,7 @@ int insereLista(const char* local) {
         scanf("%s", string); 
     }
     fprintf(ponteiro, "%s ", string);
+    
 
     setbuf(stdin, NULL);
 
@@ -265,28 +296,31 @@ void print_arq(char* filename){
 }
 
 
-int arquSort(const char* nome, int tam) {
+int arquSort(const char* nome) {
     FILE* ponteiro;
     lista* list;
     data aux;
+    char aux2;
     int size;
+    int i;
 
     list = createList();
 
-
     ponteiro = fopen(nome, "r+");
-
-
-    while(!feof(ponteiro)) {
-        for(int i = 0;i < 30;++i) {
-            aux.string[i] = fgetc(ponteiro);
+    while(1) {
+        for(i = 0;aux2 != '\n';++i){
+            aux2 = fgetc(ponteiro);
+            if(feof(ponteiro))
+            break;
+            aux.string[i] = aux2;
         }
-        aux.string[30] = 0;
+        aux.string[i] = 0;
+        push(list,aux);
         if(feof(ponteiro))
-                break;
-        push(list, aux);
+            break;
+        aux2 = 0;
     }
-    listSort(list, tam);
+    listSort(list);
     fseek(ponteiro, 0, 0);
 
     size = list->size;
@@ -295,6 +329,37 @@ int arquSort(const char* nome, int tam) {
         fputs(aux.string, ponteiro);
     }
     fclose(ponteiro);
+    destroyList(list);
 
     return 1;
+}
+void removeLista(const char* arquivo, const char* indice, const char* chave, lista* list) {
+    FILE* ponteiro1;
+    FILE* ponteiro2;
+    data aux1;
+    int aux2;
+    int aux3;
+
+    ponteiro1 = fopen(arquivo, "r+");
+    ponteiro2 = fopen(indice, "r");
+
+    aux2 = verSeTem(ponteiro2, chave);
+    //printf("%d\n", aux2);
+    aux2--;
+    fseek(ponteiro2, aux2 * IND_SIZE, 0);
+    proxChar(ponteiro2, '|');
+    fscanf(ponteiro2, "%d", &aux3);
+    aux1.end = aux3;
+    
+    push(list, aux1);
+    //printf("%d\n", aux1.end);
+    //list->head->info = aux1;
+    printf("%d\n", list->head->info.end);
+    fseek(ponteiro1, aux3, 0);
+    fputc('*', ponteiro1);
+    for(int i = 0;i < (REG_SIZE - 2);++i){
+        fputc('.', ponteiro1);
+    }
+    fclose(ponteiro1);
+    fclose(ponteiro2);
 }

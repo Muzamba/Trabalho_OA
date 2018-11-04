@@ -13,6 +13,7 @@ void push(lista* p, data item) {
     aux1->prox = p->head;
     aux1->info = item;
     p->head = aux1;
+    //printf("%d\n", p->head->info.end);
     p->size++;
 }
 
@@ -31,7 +32,7 @@ void destroyList(lista* p) {
   free(p);
 }
 
-void listSort(lista* list, int tam) {
+void listSort(lista* list) {
     node* pont;
     data aux;
     int opt;
@@ -41,7 +42,7 @@ void listSort(lista* list, int tam) {
         
         flag = 0;
         for(pont = list->head; pont->prox != NULL;pont = pont->prox) {
-            opt = strncmp(pont->info.string, pont->prox->info.string, tam);
+            opt = strcmp(pont->info.string, pont->prox->info.string);
             if (opt > 0){
                 aux = pont->info;
                 pont->info = pont->prox->info;

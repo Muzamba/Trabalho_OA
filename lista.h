@@ -6,6 +6,7 @@
 
 typedef struct Data {
     char string[100];
+    int end;
 }data;
 
 typedef struct Node{
@@ -22,7 +23,7 @@ lista* createList();
 void push(lista* p, data item);
 data pop(lista* p);
 void destroyList(lista* p);
-void listSort(lista* list, int tam);
+void listSort(lista* list);
 
 
 
