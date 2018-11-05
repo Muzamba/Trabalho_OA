@@ -152,7 +152,7 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
         fgets(aux, 3, ponteiro1);
     
         if((valor = verSeTem(ponteiro3, aux)) < 0) {
-            //fseek(ponteiro3, 0, 2);
+            fseek(ponteiro3, 0, 2);
             fputs(aux, ponteiro3);
             fputc('|',ponteiro3);
             fprintf(ponteiro3, "%d", cont * IND_SIZE);
@@ -162,7 +162,7 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
             }
             fputc('\n', ponteiro3);
         } else {
-            valor--;
+            //valor--;
             fseek(ponteiro3, valor * IND2_SIZE, 0);
             proxChar(ponteiro3, '|');
             //fseek(ponteiro3, -1, 1);
@@ -348,7 +348,7 @@ void removeLista(const char* arquivo, const char* indice, const char* chave, lis
         return;
     }
     //printf("%d\n", aux2);
-    aux2--;
+    //aux2--;
     fseek(ponteiro2, aux2 * IND_SIZE, 0);
     proxChar(ponteiro2, '|');
     fscanf(ponteiro2, "%d", &aux3);
@@ -570,4 +570,149 @@ void exibeReg(FILE* ponteiro, int tam, int posRel){
     }
     printf("\n");
     fseek(ponteiro, posRel - tam + 2, 1);
+}
+
+void upper_string(char s[]) {
+   int c = 0;
+   
+   while (s[c] != '\0') {
+      if (s[c] >= 'a' && s[c] <= 'z') {
+         s[c] = s[c] - 32;
+      }
+      c++;
+   }
+}
+
+
+void merge(const char* arquivo1, const char* arquivo2, char* output){
+
+    FILE* arq1, *arq2, *ind1, *ind2, *out;
+    int end1, end2;
+    char reg1[REG_SIZE+1], reg2[REG_SIZE+1];
+    char c;
+    int i;
+    
+    arq1 = fopen(arquivo1, "r");
+    arq2 = fopen(arquivo2, "r");
+    ind1 = fopen("indicelista1.ind", "r");
+    ind2 = fopen("indicelista2.ind", "r");
+    out  = fopen(output, "w");
+
+    proxChar(ind1,'|');
+    proxChar(ind2,'|');
+
+    fscanf(ind1,"%d",&end1);
+    fscanf(ind2, "%d",&end2);
+    printf("%d %d\n", end1, end2);
+
+
+    fseek(arq1,end1,0);
+    fseek(arq2,end2,0);
+
+    //fscanf(arq1, "%[^\n]s", reg1);
+    fgets(reg1,REG_SIZE,arq1);
+    //reg1[IND_SIZE] = fgetc(arq1);
+    fgets(reg2,REG_SIZE,arq2);
+    
+    //reg2[IND_SIZE] = fgetc(arq2);
+
+    while(!(feof(ind1) && feof(ind2))){
+        //printf("1\n");
+        printf("\nreg1:%s\n", reg1);
+        printf("reg2:%s\n", reg2);
+        if(strncmp(reg1,reg2,48) < 0){
+            fprintf(out,"%s", reg1);
+            proxChar(ind1,'\n');
+            proxChar(ind1,'|');
+            fscanf(ind1,"%d",&end1);
+            fseek(arq1,end1,0);
+            fgets(reg1, REG_SIZE, arq1);
+            //fscanf(arq1, "%[^\n]s", reg1);
+            //reg1[IND_SIZE] = fgetc(arq1);
+            if(feof(ind1))
+                break;
+
+        } else if(strncmp(reg1,reg2,48) > 0){
+            fprintf(out,"%s", reg2);
+            proxChar(ind2,'\n');
+            proxChar(ind2,'|');
+            fscanf(ind2, "%d",&end2);
+            fseek(arq2,end2,0);
+            fgets(reg2, REG_SIZE, arq2);
+            //fscanf(arq2, "%[^\n]s", reg2);
+            //reg2[IND_SIZE] = fgetc(arq2);
+            if(feof(ind2))
+                break;
+        } else {
+            fprintf(out,"%s", reg1);
+            proxChar(ind1,'\n');
+            proxChar(ind2,'\n');
+            proxChar(ind1,'|');
+            proxChar(ind2,'|');
+            fscanf(ind1,"%d",&end1);
+            fscanf(ind2, "%d",&end2);
+            fseek(arq1,end1,0);
+            fseek(arq2,end2,0);
+            fgets(reg1, REG_SIZE, arq1);
+            fgets(reg2, REG_SIZE, arq2);            
+            //fscanf(arq1, "%[^\n]s", reg1);
+            //fscanf(arq2, "%[^\n]s", reg2);
+            //reg1[IND_SIZE] = fgetc(arq1);
+            //reg2[IND_SIZE] = fgetc(arq2);
+            if(feof(ind1))
+                break;
+            if(feof(ind2))
+                break;
+        }
+    }
+
+
+
+
+
+    /*if(!feof(ind1)){
+        fprintf(out,"%s", reg1);
+        proxChar(ind1,'\n');
+        proxChar(ind1,'|');
+        fscanf(ind1,"%d",&end1);
+        fseek(arq1,end1,0);
+        fgets(reg1, REG_SIZE, arq1);
+        */
+        while (!feof(ind1)){ 
+            fprintf(out,"%s", reg1);
+            proxChar(ind1,'\n');
+            proxChar(ind1,'|');
+            fscanf(ind1,"%d",&end1);
+            fseek(arq1,end1,0);
+            fgets(reg1, REG_SIZE, arq1);
+        }
+         
+    /*} else if(!feof(ind2)) {
+        fprintf(out,"%s", reg2);
+        proxChar(ind2,'\n');
+        proxChar(ind2,'|');
+        fscanf(ind2,"%d",&end2);
+        fseek(arq2,end2,0);
+        fgets(reg2, REG_SIZE, arq2);
+        */
+        while (!feof(ind2)){ 
+            fprintf(out,"%s", reg2);
+            proxChar(ind2,'\n');
+            proxChar(ind2,'|');
+            fscanf(ind2,"%d",&end2);
+            fseek(arq2,end2,0);
+            fgets(reg2, REG_SIZE, arq2);
+        }
+          
+    //}
+ 
+    
+
+
+
+    fclose(arq1);
+    fclose(arq2);
+    fclose(ind1);
+    fclose(ind2);
+    fclose(out);
 }
