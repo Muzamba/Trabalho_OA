@@ -17,6 +17,8 @@ int insereLista(const char* local, lista* list);
 void print_arq(char* filename);
 int arquSort(const char* nome);
 void removeLista(const char* arquivo, const char* indice, const char* chave, lista* list);
+void atualizaLista(const char* arquivo, const char* indice);
+void exibeReg(FILE* ponteiro, int tam, int posRel);
 
 
 

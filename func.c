@@ -99,7 +99,7 @@ int verSeTem(FILE* ponteiro, const char* string) {
     if(ponteiro == NULL) {
         return -1;
     }
-    int cont = 1;
+    int cont = 0;
     char aux1;
     char aux[50];
     int tam;
@@ -119,7 +119,7 @@ int verSeTem(FILE* ponteiro, const char* string) {
         
 
     }
-    return 0;
+    return -1;
 }
 
 
@@ -151,7 +151,7 @@ int makeInd2(const char* data, const char* arquivo, const char* nome) {
         fseek(ponteiro1, aux2 + 52, 0);
         fgets(aux, 3, ponteiro1);
     
-        if(!(valor = verSeTem(ponteiro3, aux))) {
+        if((valor = verSeTem(ponteiro3, aux)) < 0) {
             //fseek(ponteiro3, 0, 2);
             fputs(aux, ponteiro3);
             fputc('|',ponteiro3);
@@ -219,7 +219,6 @@ int insereLista(const char* local,lista* list) {
 
     printf("Digite o nome desejado: ");
     scanf("%[^\n]s", string);
-    printf("%ld\n", strlen(string));
     while(strlen(string) >= 40) {
         printf("Digite o nome desejado: ");
         scanf("%[^\n]s", string); 
@@ -344,6 +343,10 @@ void removeLista(const char* arquivo, const char* indice, const char* chave, lis
     ponteiro2 = fopen(indice, "r");
 
     aux2 = verSeTem(ponteiro2, chave);
+    if(aux2 < 0){
+        printf("Chave não encontrada");
+        return;
+    }
     //printf("%d\n", aux2);
     aux2--;
     fseek(ponteiro2, aux2 * IND_SIZE, 0);
@@ -362,4 +365,209 @@ void removeLista(const char* arquivo, const char* indice, const char* chave, lis
     }
     fclose(ponteiro1);
     fclose(ponteiro2);
+}
+
+void atualizaLista(const char* arquivo, const char* indice){
+
+    FILE* ponteiro1;
+    FILE* ponteiro2;
+    int opt, aux, opt2;
+    char chave[30];
+    char Registro[65];
+    char string[50];
+    printf("1.Com mudança de chave primaria\n");
+    printf("2.Sem mudança de chave primaria\n");
+    printf("Escolha o modo de atualização:");
+    scanf("%d", &opt);
+    while((opt != 1) && (opt != 2)){
+        printf("Escolha o modo de atualização:");
+        scanf("%d", &opt);
+    }
+    ponteiro1 = fopen(arquivo, "r+");
+    if(opt == 1){
+        ponteiro2 = fopen(indice, "r+");
+    }else {
+        ponteiro2 = fopen(indice, "r");
+    }
+
+    printf("Digite a chave do registro que quer atualizar: ");
+    scanf("%s", chave);
+
+    aux = verSeTem(ponteiro2, chave);
+    while(aux < 0){
+        printf("Registro não encontrado\n");
+        printf("Digite a chave do registro que quer atualizar: ");
+        scanf("%s", chave);
+        aux = verSeTem(ponteiro2, chave);
+    }
+    
+    fseek(ponteiro2, aux * IND_SIZE, 0);
+    proxChar(ponteiro2, '|');
+    fscanf(ponteiro2, "%d", &aux);
+
+    fseek(ponteiro1, aux, 0);
+
+
+    
+
+
+
+    if(opt == 2){
+        fseek(ponteiro1, 48, 1);
+    }
+
+    switch(opt){
+
+        case 1:
+            exibeReg(ponteiro1, REG_SIZE, 0);
+            printf("1.Sim\n2.Não\n");
+            printf("Deseja alterar a matrícula?\n");
+            scanf("%d", &opt2);
+            while((opt2 != 1)&&(opt2 != 2)){
+                printf("1.Sim\n2.Não\n");
+                printf("Deseja alterar a matrícula?\n");
+                scanf("%d", &opt2);
+            }
+            if(opt2 == 1){
+                setbuf(stdin, NULL);
+                printf("Digite a nova matrícula desejada: ");
+                scanf("%s", string);
+                while(strlen(string) != 6) {
+                    printf("Digite a nova matrícula desejada: ");
+                    scanf("%s", string); 
+                }
+                fprintf(ponteiro1, "%s ", string);
+                
+            }else{
+                fseek(ponteiro1, 7, 1);
+            }
+            exibeReg(ponteiro1, REG_SIZE, 7);
+            printf("1.Sim\n2.Não\n");
+            printf("Deseja alterar o nome?\n");
+            scanf("%d", &opt2);
+            while((opt2 != 1)&&(opt2 != 2)){
+                printf("1.Sim\n2.Não\n");
+                printf("Deseja alterar o nome?\n");
+                scanf("%d", &opt2);
+            }
+            if(opt2 == 1){
+                setbuf(stdin, NULL);
+                printf("Digite o novo nome desejado: ");
+                scanf("%[^\n]s", string);
+                while(strlen(string) >= 40) {
+                printf("Digite o novo nome desejado: ");
+                scanf("%[^\n]s", string); 
+                }
+                fprintf(ponteiro1, "%s ", string);
+                for(int i = strlen(string); i < 40;++i) {
+                    fputc(' ', ponteiro1);
+                }
+
+                
+            }else{
+                fseek(ponteiro1, 41, 1);
+            }
+        
+        case 2:
+            exibeReg(ponteiro1, REG_SIZE, 48);
+            printf("1.Sim\n2.Não\n");
+            printf("Deseja alterar a OP?\n");
+            scanf("%d", &opt2);
+            while((opt2 != 1)&&(opt2 != 2)){
+                printf("1.Sim\n2.Não\n");
+                printf("Deseja alterar a OP?\n");
+                scanf("%d", &opt2);
+            }
+            if(opt2 == 1){
+                setbuf(stdin, NULL);
+                printf("Digite a nova OP desejada: ");
+                scanf("%s", string);
+                while(strlen(string) != 2) {
+                    printf("Digite a nova OP desejada: ");
+                    scanf("%s", string); 
+                }
+                fprintf(ponteiro1, "%s ", string);
+                fputc(' ', ponteiro1);
+
+                
+            }else {
+                fseek(ponteiro1, 4, 1);
+            }
+
+            exibeReg(ponteiro1, REG_SIZE, 52);
+            printf("1.Sim\n2.Não\n");
+            printf("Deseja alterar o curso?\n");
+            scanf("%d", &opt2);
+            while((opt2 != 1)&&(opt2 != 2)){
+                printf("1.Sim\n2.Não\n");
+                printf("Deseja alterar o curso?\n");
+                scanf("%d", &opt2);
+            }
+            if(opt2 == 1){
+                setbuf(stdin, NULL);
+                printf("Digite o novo curso desejado: ");
+                scanf("%s", string);
+                while(strlen(string) != 2) {
+                    printf("Digite o novo curso desejado: ");
+                    scanf("%s", string); 
+                }
+                fprintf(ponteiro1, "%s ", string);
+                for(int i = 0;i < 6;++i) {
+                    fputc(' ', ponteiro1);
+                }
+
+                
+            }else{
+                fseek(ponteiro1, 9, 1);
+            }
+
+            exibeReg(ponteiro1, REG_SIZE, 61);
+            printf("1.Sim\n2.Não\n");
+            printf("Deseja alterar a turma?\n");
+            scanf("%d", &opt2);
+            while((opt2 != 1)&&(opt2 != 2)){
+                printf("1.Sim\n2.Não\n");
+                printf("Deseja alterar a turma?\n");
+                scanf("%d", &opt2);
+            }
+            if(opt2 == 1){
+                setbuf(stdin, NULL);
+                printf("Digite a turma desejada: ");
+                scanf("%s", string);
+                while(strlen(string) != 1) {
+                    printf("Digite a turma desejada: ");
+                    scanf("%s", string); 
+                }
+                fprintf(ponteiro1, "%s", string);
+
+                
+            }else{
+                fseek(ponteiro1, 1, 1);
+            }
+            fputc(13, ponteiro1);
+            fputc('\n', ponteiro1);
+    }
+    fclose(ponteiro1);
+    fclose(ponteiro2);
+    if(opt == 1){
+        makeInd1(arquivo, indice);
+    }
+
+}
+
+void exibeReg(FILE* ponteiro, int tam, int posRel){
+    fseek(ponteiro, -posRel,1);
+    for(int i = 0;i < tam + 2;++i){
+        printf("*");
+    }
+    printf("\n*");
+    for(int i = 0;i < tam-2;++i){
+        printf("%c",fgetc(ponteiro));
+    }
+    printf("  *\n");
+    for(int i = 0;i < tam + 2;++i){
+        printf("*");
+    }
+    printf("\n");
+    fseek(ponteiro, posRel - tam + 2, 1);
 }
